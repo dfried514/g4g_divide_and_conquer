@@ -7,55 +7,41 @@
 //= ac + ad + bc + bd (- ac - bd) = ad + bc
 //then compute the formula
 //return the input if the input length is 1 or 0
+const bigInt = require('big-integer');
+
 const multiply_karatsuba = (x, y) => {
-  const makeEqualLengthAndPowerOfTwo = (x, y) => {
-    if (typeof x !== 'string') {
-      x = x.toString();
-    }
-    if (typeof y !== 'string') {
-      y = y.toString();
-    }
-    while (x.length !== y.length) {
-      if (x.length < y.length) {
-        x = '0' + x;
-      } else {
-        y = '0' + y;
-      }
-    }
-    while (x.length > 1 && x.length % 2 > 0) {
-      x = '0' + x;
-      y = '0' + y;
-    }
-    return [x, y];
-  };
-  let inputs = makeEqualLengthAndPowerOfTwo(x, y);
-  let xStr = inputs[0];
-  let yStr = inputs[1];
+  let xBig = bigInt(x);
+  let yBig = bigInt(y);
 
-  let n = xStr.length;
-
+  let n = (xBig.toString().length >= yBig.toString().length)
+    ? xBig.toString().length : yBig.toString().length;
   if (n === 1) {
-    return x * y;
+    return xBig.times(yBig);
   }
-  const aStr = xStr.substring(0, Math.floor(n/2));
-  const bStr = xStr.substring(Math.floor(n/2));
-  const cStr = yStr.substring(0, Math.floor(n/2));
-  const dStr = yStr.substring(Math.floor(n/2));
+  while (n % 2 > 0) {
+    n++;
+  }
+  const aBig = bigInt(xBig.toString().slice(0, xBig.toString().length - Math.floor(n/2)));
+  const bBig = bigInt(xBig.toString().slice(Math.floor(-n/2)));
+  const cBig = bigInt(yBig.toString().slice(0, yBig.toString().length - Math.floor(n/2)));
+  const dBig = bigInt(yBig.toString().slice(Math.floor(-n/2)));
 
-  const a = parseInt(aStr);
-  const b = parseInt(bStr);
-  const c = parseInt(cStr);
-  const d = parseInt(dStr);
+  let ac = multiply_karatsuba(aBig, cBig);
+  ac = bigInt(ac);
+  let bd = multiply_karatsuba(bBig, dBig);
+  let step3 = multiply_karatsuba(aBig.plus(bBig), cBig.plus(dBig));
+  step3 = bigInt(step3);
+  let adPlusBc = step3.minus(bd).minus(ac);
 
-  const ac = multiply_karatsuba(a, c);
-  const bd = multiply_karatsuba(b, d);
-  const step3 = multiply_karatsuba((a + b), (c + d));
-  const adPlusBc = step3 - bd - ac;
-
-  return (Math.pow(10, n) * ac) + (Math.pow(10, n/2) * adPlusBc) + bd;
+  return ac.times(bigInt(10).pow(n)).add(adPlusBc.times(bigInt(10).pow(n/2))).add(bd).toString();
 };
 
-let x = 5678;
-let y = 1234;
+let x = bigInt('3141592653589793238462643383279502884197169399375105820974944592');
+let y = bigInt('2718281828459045235360287471352662497757247093699959574966967627');
 
+
+let a = bigInt('1234');
+let b = bigInt('5678');
+
+console.log(multiply_karatsuba(a, b));
 console.log(multiply_karatsuba(x, y));
