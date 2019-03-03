@@ -58,8 +58,8 @@ const multiply_bruteForce = (x, y) => {
   return Number(output);
 }
 
-let x = 5678;
-let y = 1234;
+let x = '1234'
+let y = '5678'
 
 console.log(multiply_bruteForce(x, y));
 
